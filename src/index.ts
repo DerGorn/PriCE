@@ -48,6 +48,9 @@ const onSettingsClickHandler = () => {
 const createSettingsMenu = () => {
   const settings = createDiv("settings", "center");
 
+  const title = createDiv("", "title");
+  title.innerText = "Settings";
+
   const userSetting = createDiv("user", "setting");
   userSetting.innerText = "Username: ";
   const userInput = document.createElement("input");
@@ -57,9 +60,9 @@ const createSettingsMenu = () => {
   userInput.style.textAlign = "center";
   userInput.addEventListener("keypress", (event) => {
     if (event.key === "Enter") {
-        User = userInput.value;
+      User = userInput.value;
     }
-  })
+  });
 
   const end = createDiv("settings", "icon");
   end.style.position = "absolute";
@@ -77,13 +80,22 @@ const createSettingsMenu = () => {
   });
 
   userSetting.append(userInput);
-  settings.append(userSetting, end);
+  settings.append(title, userSetting, end);
   body.append(settings);
-  console.log("settings");
 };
 
 const onConnectClickHandler = () => {
-  console.log("connect");
+  const peerInput = document.getElementById("peerId") as HTMLInputElement;
+  if (peerInput == null) {
+    throw new Error(
+      "Destroyed UI. Somehow the Input field next to this button vanished."
+    );
+  }
+  peerId = peerInput.value;
+  peerInput.value = "";
+  conn = peer.connect(peerId);
+  conn.on("open", startConnection);
 };
 
 main();
+// createChat()

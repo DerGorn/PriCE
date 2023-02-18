@@ -36,6 +36,8 @@ const onSettingsClickHandler = () => {
 };
 const createSettingsMenu = () => {
     const settings = createDiv("settings", "center");
+    const title = createDiv("", "title");
+    title.innerText = "Settings";
     const userSetting = createDiv("user", "setting");
     userSetting.innerText = "Username: ";
     const userInput = document.createElement("input");
@@ -61,11 +63,17 @@ const createSettingsMenu = () => {
         startMenu.style.visibility = "visible";
     });
     userSetting.append(userInput);
-    settings.append(userSetting, end);
+    settings.append(title, userSetting, end);
     body.append(settings);
-    console.log("settings");
 };
 const onConnectClickHandler = () => {
-    console.log("connect");
+    const peerInput = document.getElementById("peerId");
+    if (peerInput == null) {
+        throw new Error("Destroyed UI. Somehow the Input field next to this button vanished.");
+    }
+    peerId = peerInput.value;
+    peerInput.value = "";
+    conn = peer.connect(peerId);
+    conn.on("open", startConnection);
 };
 main();
