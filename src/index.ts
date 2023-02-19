@@ -116,9 +116,11 @@ const createNotification = (type: "audio" | "video") => {
     volume.style.backgroundImage = `url(./icons/${
       mutePeerCall ? "notH" : "h"
     }eadphones.png)`;
-    peerAudioStream?.getAudioTracks().forEach((track) => {
-      track.enabled = !mutePeerCall;
-    });
+    (type === "audio" ? peerAudioStream : peerVideoStream)
+      ?.getAudioTracks()
+      .forEach((track) => {
+        track.enabled = !mutePeerCall;
+      });
   });
   const expand = document.createElement("div");
   if (type === "video") {
@@ -150,5 +152,3 @@ const createNotification = (type: "audio" | "video") => {
 };
 
 main();
-// createChat();
-// createNotification("video");

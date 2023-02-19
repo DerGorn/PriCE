@@ -94,7 +94,7 @@ const sendMessage = (message: string, user = true, initime = 0) => {
     lastMessageMetaData.user = user;
   }
   const content = document.createElement("p");
-  content.classList.add("messageBody");
+  content.classList.add("messageBody", "selectable");
   content.innerText = message;
   const t = initime === 0 ? new Date() : new Date(initime);
   const time = `${t.getHours()}:${

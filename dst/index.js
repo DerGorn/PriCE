@@ -87,7 +87,9 @@ const createNotification = (type) => {
     volume.addEventListener("click", () => {
         mutePeerCall = !mutePeerCall;
         volume.style.backgroundImage = `url(./icons/${mutePeerCall ? "notH" : "h"}eadphones.png)`;
-        peerAudioStream?.getAudioTracks().forEach((track) => {
+        (type === "audio" ? peerAudioStream : peerVideoStream)
+            ?.getAudioTracks()
+            .forEach((track) => {
             track.enabled = !mutePeerCall;
         });
     });
