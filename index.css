@@ -52,18 +52,18 @@ body {
 }
 
 .connectButton {
-    background-color: var(--text-color);
-    border-radius: 3px;
-    border: 2px solid var(--blue);
-    color: var(--dark-background);
-    margin-left: 5px;
-    padding: 2px;
+  background-color: var(--text-color);
+  border-radius: 3px;
+  border: 2px solid var(--blue);
+  color: var(--dark-background);
+  margin-left: 5px;
+  padding: 2px;
 }
 
 .connectButton:hover {
-    color: var(--blue);
-    background-color: var(--light-background);
-    border: 2px solid var(--dark-background);
+  color: var(--blue);
+  background-color: var(--light-background);
+  border: 2px solid var(--dark-background);
 }
 
 .chatScreen {
@@ -172,4 +172,50 @@ body {
 
 .selectable {
   user-select: text;
+}
+
+.notificationHolder {
+  height: calc(99vh - 35px);
+  width: 1px;
+  position: absolute;
+  right: 0;
+  top: calc(0.5vh + 35px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 100;
+  overflow: visible;
+}
+
+.notification {
+  background-color: var(--dark-background);
+  width: 160px;
+  margin-top: 8px;
+  margin-right: -55px;
+  height: 35px;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--dark-background);
+  transition: margin-right 1s;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.notification:hover,
+.notification:focus {
+  border: 2px solid var(--blue);
+  margin-right: 170px;
+}
+
+.identifier {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--blue);
+  background-position: center;
+  background-size: cover;
+  position: absolute;
+  margin-right: 155px;
+  margin-bottom: 25px;
 }

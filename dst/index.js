@@ -1,5 +1,6 @@
 "use strict";
 let startMenu = null;
+const notificationHolder = document.getElementsByClassName("notificationHolder")[0];
 let User = "Anonymous";
 const main = () => {
     const Connection = createDiv("Connection", "center");
@@ -75,5 +76,44 @@ const onConnectClickHandler = () => {
     peerInput.value = "";
     conn = peer.connect(peerId);
     conn.on("open", startConnection);
+};
+const createNotification = (type) => {
+    const container = createDiv("", "notification");
+    container.tabIndex = 0;
+    const identifier = createDiv("", "identifier");
+    identifier.style.backgroundImage = `url(./icons/${type === "audio" ? "call" : "stream"}.png)`;
+    const volume = createDiv("", "icon");
+    volume.style.backgroundImage = "url(./icons/headphones.png)";
+    volume.addEventListener("click", () => {
+        mutePeerCall = !mutePeerCall;
+        volume.style.backgroundImage = `url(./icons/${mutePeerCall ? "notH" : "h"}eadphones.png)`;
+        peerAudioStream?.getAudioTracks().forEach((track) => {
+            track.enabled = !mutePeerCall;
+        });
+    });
+    const expand = document.createElement("div");
+    if (type === "video") {
+        expand.classList.add("icon");
+        expand.style.backgroundImage = "url(./icons/fullScreen.png)";
+        expand.addEventListener("click", () => {
+            peerStreamFullScreen = !peerStreamFullScreen;
+            peerVideoElement &&
+                (peerVideoElement.style.visibility = peerStreamFullScreen
+                    ? "visible"
+                    : "hidden");
+            expand.style.backgroundImage = `url(./icons/${peerStreamFullScreen ? "notF" : "f"}ullScreen.png)`;
+        });
+    }
+    const end = document.createElement("div");
+    end.classList.add("icon");
+    end.style.backgroundImage = "url(./icons/end.png)";
+    end.addEventListener("click", () => {
+        container.remove();
+        type === "audio"
+            ? peerAudioCall && peerAudioCall.close()
+            : peerVideoCall && peerVideoCall.close();
+    });
+    container.append(identifier, volume, expand, end);
+    notificationHolder.append(container);
 };
 main();

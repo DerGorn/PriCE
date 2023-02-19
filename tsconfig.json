@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dst",
     "removeComments": true,
-    "target": "es2017",
+    "target": "ES2022",
     "moduleResolution": "node",
     "alwaysStrict": true,
     "allowUnreachableCode": false,
@@ -13,5 +13,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["./src/*.ts"]
+  "include": [
+    "./src/*.ts"
+  ]
 }

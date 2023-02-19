@@ -31,23 +31,16 @@ const createChat = () => {
     const iconHolder = createDiv("", "iconHolder");
     const end = createDiv("", "icon");
     end.style.backgroundImage = "url(./icons/end.png)";
-    end.addEventListener("click", () => {
-        container.remove();
-        const connectOverlay = document.getElementById("Connection");
-        if (connectOverlay == null) {
-            throw new Error("Somehow deleted the 'startMenu', but it should only be invisible.");
-        }
-        connectOverlay.style.visibility = "visible";
-    });
+    end.addEventListener("click", onEndClickHandler);
     const call = document.createElement("div");
     call.classList.add("icon");
     call.style.backgroundImage = "url(./icons/call.png)";
-    call.addEventListener("click", async () => { });
+    call.addEventListener("click", onCallClickHandler);
     callIcon = call;
     const stream = document.createElement("div");
     stream.classList.add("icon");
     stream.style.backgroundImage = "url(./icons/stream.png)";
-    stream.addEventListener("click", async () => { });
+    stream.addEventListener("click", onStreamClickHandler);
     streamIcon = stream;
     messageHolder = createDiv("", "messageHolder");
     chatInput.addEventListener("keydown", (event) => {
@@ -104,7 +97,7 @@ const sendMessage = (message, user = true, initime = 0) => {
         throw new Error("Trying to chat with no one. Writing a message makes no sense, when there is no 'messageHolder'.");
     }
     messageHolder.append(msg);
-    messageHolder.scrollTop = messageHolder === null || messageHolder === void 0 ? void 0 : messageHolder.scrollHeight;
+    messageHolder.scrollTop = messageHolder?.scrollHeight;
     timestamp.style.top = `${msg.getBoundingClientRect().bottom -
         timestamp.getBoundingClientRect().height}`;
     if (initime === 0) {
@@ -120,5 +113,96 @@ const sendMessage = (message, user = true, initime = 0) => {
         catch (e) {
             throw new Error("Tried sending a message into the void. But no one listened.\n\n" + e);
         }
+    }
+};
+const onEndClickHandler = () => {
+    body.lastChild?.remove();
+    if (audioStream) {
+        audioStream.getTracks().forEach((track) => track.stop());
+        audioStream = null;
+        audioCall.close();
+        audioCall = null;
+    }
+    if (videoStream) {
+        videoStream.getTracks().forEach((track) => track.stop());
+        videoStream = null;
+        videoCall.close();
+        videoCall = null;
+    }
+    if (peerAudioCall) {
+        peerAudioCall.close();
+        peerAudioCall = null;
+    }
+    if (peerVideoCall) {
+        peerVideoCall.close();
+        peerVideoCall = null;
+    }
+    conn.close();
+    peerUser = "";
+    peerId = null;
+    const connectOverlay = document.getElementById("Connection");
+    if (connectOverlay == null) {
+        throw new Error("Somehow deleted the 'startMenu', but it should only be invisible.");
+    }
+    connectOverlay.style.visibility = "visible";
+};
+const onCallClickHandler = async () => {
+    if (audioCall) {
+        if (callIcon == null) {
+            throw new Error("Clicked on a non existend Button. 'callIcon' was clicked but is 'null'.");
+        }
+        callIcon.style.backgroundColor = "unset";
+        audioCall.close();
+        audioCall = null;
+        return;
+    }
+    const audio = await getAudio();
+    if (audio) {
+        if (callIcon == null) {
+            throw new Error("Clicked on a non existend Button. 'callIcon' was clicked but is 'null'.");
+        }
+        callIcon.style.backgroundColor = "red";
+        audioCall = peer.call(peerId, audio, { metadata: "audio" });
+        audioCall.on("close", () => {
+            if (audioStream == null)
+                return;
+            audioStream.getTracks().forEach((track) => track.stop());
+            audioStream = null;
+            if (callIcon == null) {
+                throw new Error("Clicked on a non existend Button. 'callIcon' was clicked but is 'null'.");
+            }
+            callIcon.style.backgroundColor = "unset";
+        });
+        audioStream = audio;
+    }
+};
+const onStreamClickHandler = async () => {
+    if (videoCall) {
+        if (streamIcon == null) {
+            throw new Error("Clicked on a non existend Button. 'streamIcon' was clicked but is 'null'.");
+        }
+        streamIcon.style.backgroundColor = "unset";
+        videoCall.close();
+        videoCall = null;
+        return;
+    }
+    const video = await getVideo();
+    if (video) {
+        if (streamIcon == null) {
+            throw new Error("Clicked on a non existend Button. 'streamIcon' was clicked but is 'null'.");
+        }
+        streamIcon.style.backgroundColor = "red";
+        videoCall = peer.call(peerId, video, { metadata: "video" });
+        videoCall.on("close", () => {
+            if (videoStream == null)
+                return;
+            videoStream.getTracks().forEach((track) => track.stop());
+            videoStream = null;
+            if (streamIcon == null) {
+                throw new Error("Clicked on a non existend Button. 'streamIcon' was clicked but is 'null'.");
+            }
+            streamIcon.style.backgroundColor = "unset";
+        });
+        videoStream = video;
     }
 };

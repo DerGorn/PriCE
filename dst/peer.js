@@ -1,6 +1,18 @@
 "use strict";
+let audioStream = null;
+let audioCall = null;
+let videoStream = null;
+let videoCall = null;
 let peerUser = "";
 let peerId = null;
+let peerAudioCall = null;
+let peerAudioStream = null;
+let peerAudioElement = null;
+let mutePeerCall = false;
+let peerVideoCall = null;
+let peerVideoStream = null;
+let peerStreamFullScreen = false;
+let peerVideoElement = null;
 const peer = new Peer();
 let conn = null;
 let id = "";
@@ -14,12 +26,49 @@ peer.on("connection", (con) => {
     conn = con;
     conn.on("open", startConnection);
 });
+peer.on("call", (cal) => {
+    switch (cal.metadata) {
+        case "audio":
+            peerAudioCall = cal;
+            peerAudioCall.on("stream", receiveAudioCall);
+            peerAudioCall.on("close", () => {
+                peerAudioStream = null;
+                peerAudioElement && peerAudioElement.remove();
+                peerAudioElement = null;
+                conn.send({ type: "close", message: { type: "audio" } });
+            });
+            peerAudioCall.answer();
+            break;
+        case "video":
+            peerVideoCall = cal;
+            peerVideoCall.on("stream", receiveVideoCall);
+            peerVideoCall.on("close", () => {
+                peerVideoStream = null;
+                peerVideoElement && peerVideoElement.remove();
+                peerVideoElement = null;
+                conn.send({ type: "close", message: { type: "video" } });
+            });
+            peerVideoCall.answer();
+            break;
+    }
+});
 const startConnection = () => {
     conn.on("data", (data) => {
         switch (data.type) {
             case "chat":
                 const da = data.message;
                 sendMessage(da.message, false, da.time);
+                break;
+            case "close":
+                const dd = data.message;
+                switch (dd.type) {
+                    case "audio":
+                        audioCall && audioCall.close();
+                        break;
+                    case "video":
+                        videoCall && videoCall.close();
+                        break;
+                }
                 break;
             case "connected":
                 const d = data.message;
@@ -38,11 +87,16 @@ const startConnection = () => {
         console.log("Received: ", data);
     });
     conn.on("close", () => {
-        var _a;
-        (_a = body.lastChild) === null || _a === void 0 ? void 0 : _a.remove();
+        body.lastChild?.remove();
         const connectOverlay = document.getElementById("Connection");
         if (connectOverlay == null) {
             throw new Error("Somehow deleted the 'startMenu', but it should only be invisible.");
+        }
+        audioCall && audioCall.close();
+        videoCall && videoCall.close();
+        const notifications = notificationHolder.children;
+        for (const i = 0; i < notifications.length;) {
+            notifications[i].remove();
         }
         connectOverlay.style.visibility = "visible";
     });
@@ -53,4 +107,31 @@ const startConnection = () => {
             id,
         },
     });
+};
+const receiveAudioCall = (stream) => {
+    peerAudioStream = stream;
+    createNotification("audio");
+    const audio = document.createElement("audio");
+    audio.autoplay = true;
+    audio.srcObject = peerAudioStream;
+    const chat = body.lastChild;
+    chat.append(audio);
+    peerAudioElement = audio;
+};
+const receiveVideoCall = (stream) => {
+    peerVideoStream = stream;
+    createNotification("video");
+    const video = document.createElement("div");
+    video.classList.add("center");
+    video.style.maxHeight = `calc(99vh - 35px - var(--chat-height))`;
+    video.style.top = "calc(0.5vh + 35px)";
+    const vid = document.createElement("video");
+    vid.srcObject = stream;
+    vid.playsInline = true;
+    vid.autoplay = true;
+    video.append(vid);
+    const chat = body.lastChild;
+    chat.append(video);
+    peerVideoElement = video;
+    peerVideoElement.style.visibility = "hidden";
 };
